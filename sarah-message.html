@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Sarah</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0a192f;
+            --secondary-blue: #112240;
+            --accent-orange: #ff7e67;
+            --light-orange: #ffb4a2;
+            --text-light: #e6f1ff;
+            --text-muted: #8892b0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--primary-blue);
+            color: var(--text-light);
+            line-height: 1.8;
+            overflow: hidden; /* Hide scroll for slideshow */
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes heartPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(-150px) scale(1.5) rotate(20deg); }
+        }
+
+        /* Slideshow Container */
+        .slideshow {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.8s ease-in-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Heart Transition Overlay */
+        #heart-transition {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 100vmax;
+            height: 100vmax;
+            background-color: var(--accent-orange);
+            /* A CSS heart using clip-path on a square */
+            clip-path: path('M 500,300 C 500,300 450,200 350,200 C 200,200 200,400 200,400 C 200,550 500,800 500,800 C 500,800 800,550 800,400 C 800,400 800,200 650,200 C 550,200 500,300 500,300 z');
+            /* Since path is absolute, scaling a div is easier */
+            z-index: 100;
+            pointer-events: none;
+            transition: transform 1.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+            mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M50,30 C50,30 45,20 35,20 C20,20 20,40 20,40 C20,55 50,80 50,80 C50,80 80,55 80,40 C80,40 80,20 65,20 C55,20 50,30 50,30 z" fill="white"/></svg>');
+            mask-size: cover;
+            mask-position: center;
+            background: var(--accent-orange);
+            mask-repeat: no-repeat;
+        }
+
+        /* Slide Content Styles */
+        .content-box {
+            background: var(--secondary-blue);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px -15px rgba(2, 12, 27, 0.7);
+            border-left: 4px solid var(--accent-orange);
+            max-width: 800px;
+            width: 100%;
+            animation: fadeIn 1s ease;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        h1 span {
+            color: var(--accent-orange);
+            font-style: italic;
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            color: var(--accent-orange);
+            margin-bottom: 1.5rem;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: #a8b2d1;
+        }
+
+        .highlight {
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        /* Next Button */
+        .next-btn {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            background: linear-gradient(135deg, var(--accent-orange), var(--light-orange));
+            color: var(--primary-blue);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 126, 103, 0.4);
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            animation: heartPulse 2s infinite;
+        }
+
+        .next-btn:hover {
+            transform: scale(1.05) translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 126, 103, 0.6);
+            animation: none;
+        }
+
+        .next-btn i {
+            font-size: 1.5rem;
+        }
+
+        /* Floating Hearts */
+        .floating-heart {
+            position: fixed;
+            color: var(--accent-orange);
+            font-size: 24px;
+            pointer-events: none;
+            z-index: 99;
+            animation: floatUp 1s ease-out forwards;
+        }
+
+        /* Stickers & Fun Elements */
+        .sticker {
+            position: absolute;
+            font-size: 3rem;
+            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
+            animation: fadeIn 1s ease forwards;
+            z-index: 10;
+        }
+        .sticker-1 { top: -20px; right: -20px; transform: rotate(15deg); }
+        .sticker-2 { bottom: -20px; left: -20px; transform: rotate(-15deg); }
+        .sticker-3 { top: 40%; right: -40px; transform: rotate(30deg); font-size: 4rem; }
+
+        .pickup-line {
+            font-style: italic;
+            background: rgba(255, 126, 103, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            border-left: 3px solid var(--accent-orange);
+            margin-bottom: 1rem;
+            color: var(--light-orange);
+        }
+
+        /* Image Grids */
+        .image-container {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        .image-container img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            border: 2px solid rgba(255, 126, 103, 0.2);
+        }
+
+        /* Verses */
+        .verses-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .verse-card {
+            background: rgba(255, 126, 103, 0.05);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border-left: 3px solid var(--accent-orange);
+        }
+        .verse-text { font-style: italic; margin-bottom: 0.5rem; }
+        .verse-ref { font-weight: 600; color: var(--accent-orange); font-size: 0.9rem; margin-bottom: 0;}
+
+        /* Prevent button overflow on small screens */
+        @media (max-width: 768px) {
+            .next-btn {
+                bottom: 20px;
+                right: 20px;
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+            .content-box { padding: 2rem; }
+            h1 { font-size: 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="heart-transition"></div>
+
+    <div class="slideshow" id="slideshow">
+        
+        <!-- Slide 1: Header -->
+        <div class="slide active">
+            <div style="text-align: center;">
+                <h1>Dearest <span>Sarah</span>,</h1>
+                <p style="font-size: 1.4rem; color: var(--light-orange);">How have you been since the last time we spoke?</p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Courteous Check-In -->
+        <div class="slide">
+            <div class="content-box">
+                <h2>A Courteous Check-In</h2>
+                <p>I hope this message finds you enveloped in warmth and peace. It’s been a little while since we last talked, and I often find myself wondering how you are doing.</p>
+                <p>I hope your days have been gentle and that you are smiling brightly, just as beautifully as I remember.</p>
+            </div>
+        </div>
+
+        <!-- Slide 3: Shared Energy -->
+        <div class="slide">
+            <div class="content-box">
+                <h2>Shared Energy & Understanding</h2>
+                <p>I want you to understand that the fact I also went silent doesn't mean I gave up on you or stopped caring. <span class="highlight">I am also a plant that needs to be watered</span>, just as much as I water others.</p>
+                <p>You know how it feels to pour energy out and not receive the same in return. I am human too, and being treated coldly hurts. It brings me peace when you consider my feelings alongside yours.</p>
+                <p>Writing this to you comes from a place of great honor and from the depth of the friendship we had. If I were viewing this merely from the angle of lovers, the anger of being hurt would have clouded my words. We were smiling together, and then suddenly, you gave up.</p>
+                <p>You left without even closing the door, as if the house that contained you was no longer of importance. I didn't deserve that. But in all that, my maturity and the bond we shared dissolves those feelings, and that's why I am able to keep pushing forward in a healthy way.</p>
+            </div>
+        </div>
+
+        <!-- Slide 4: Respecting Journey -->
+        <div class="slide">
+            <div class="content-box">
+                <h2>Respecting Your Journey</h2>
+                <p>You told me you wanted to take a step back to find yourself, discover your own peace, and grow in the spirit. <span class="highlight">I want you to know how deeply I respect and admire that decision.</span> I don't want you to ever feel guilty for choosing yourself and your spiritual path. Growth is irresistible and absolutely necessary.</p>
+                <p>I want you to know that choosing you, over and over again, isn't born out of desperation or weakness. It's the hallmark of <span class="highlight">a true man who stands by his words, his feelings, and his decisions</span>. I care for you deeply, and I respect your space to flourish.</p>
+            </div>
+        </div>
+
+        <!-- Slide 5: Fun & Memories -->
+        <div class="slide">
+            <div class="content-box">
+                <div class="sticker sticker-1">😂</div>
+                <div class="sticker sticker-2">💃</div>
+                <div class="sticker sticker-3">✨</div>
+                <h2>A Little Laughter</h2>
+                <p>I was thinking about us and a short funny memory crossed my mind... remember all those inside jokes? Or how we used to literally talk like our parents giving advice? It made me smile so hard my cheeks hurt.</p>
+                <p>Actually, speaking of making me smile, I have a few questions for you:</p>
+                
+                <div class="pickup-line">
+                    "Are you a Wi-Fi signal? Because despite the distance, I’m still feeling a strong connection. 📶"
+                </div>
+                <div class="pickup-line">
+                    "Do you have a map? Because I keep getting lost in your eyes... and apparently, I get lost trying to figure out how to cook without burning things, so I really need you back! 🗺️"
+                </div>
+                
+                <p>I genuinely miss making jokes and having fun with you, physically and over the phone. I miss dancing for you. Please, never feel like you were a burden or that you did something bad. You brought light.</p>
+            </div>
+        </div>
+
+        <!-- Slide 6: The Value of You -->
+        <div class="slide">
+            <div class="content-box">
+                <h2>The Value of You</h2>
+                <p>Even if a love affair isn't where we are right now, <span class="highlight">Sarah, you are so much more important than just a romantic title</span>. I genuinely miss your advice, our deep talks, and the time we spent together. Every moment was worth it because your presence brings a profound light into my life.</p>
+                <!-- Include image if present -->
+                <div class="image-container">
+                    <img src="sarah-beauty.jpg" alt="A reflection of beauty" onerror="this.style.display='none'">
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Faith & Focus -->
+        <div class="slide">
+            <div class="content-box">
+                <h2>Faith & Focus</h2>
+                <p>I took my time before I chose you, and that is why I am not giving up on you. <span class="highlight">The love we share found us when we were already happy, and we shouldn't let it just fly away.</span></p>
+                <p>I believe in myself, and I know I have exactly what it takes to take care of the woman I cherish. Despite this heartbreaking moment, I am constantly praying for you.</p>
+                <p>No one is rushing things. I, too, am focusing on the things I want to achieve as a man, and I know God is going to help us both achieve greatness. The perfections I see in you—they are real, and the vision of them is beautifully doable.</p>
+            </div>
+        </div>
+
+        <!-- Slide 8: Health Note -->
+        <div class="slide">
+            <div class="content-box">
+                <div class="sticker sticker-1">🍜</div>
+                <h2>A Gentle Reminder</h2>
+                <p>On a more practical note...</p>
+                <p class="highlight" style="font-size: 1.3rem;">Please don't consume lots of indomies!</p>
+                <p>They have side effects, and the very least I want for you is to see you stay incredibly healthy, strong, and beautiful. Take care of that wonderful body of yours.</p>
+            </div>
+        </div>
+
+        <!-- Slide 9: Growing in God's Light -->
+        <div class="slide">
+            <div class="content-box">
+                <h2>Growing in God's Light</h2>
+                <p>You are perfect exactly as you are, and watching you grow is a beautiful thing. As you seek peace and spiritual elevation, remember:</p>
+                
+                <div class="verses-grid">
+                    <div class="verse-card">
+                        <p class="verse-text">"You are altogether beautiful, my darling; there is no flaw in you."</p>
+                        <p class="verse-ref">SONG OF SOLOMON 4:7</p>
+                    </div>
+                    <div class="verse-card">
+                        <p class="verse-text">"But grow in the grace and knowledge of our Lord and Savior Jesus Christ..."</p>
+                        <p class="verse-ref">2 PETER 3:18</p>
+                    </div>
+                    <div class="verse-card">
+                        <p class="verse-text">"I praise you because I am fearfully and wonderfully made..."</p>
+                        <p class="verse-ref">PSALM 139:14</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Footer -->
+        <div class="slide">
+            <div class="content-box" style="text-align: center;">
+                <h2>Yours Truly</h2>
+                <p>With endless respect, unwavering care, and continuous prayers.</p>
+                <p style="margin-top: 2rem;">
+                    <a href="https://youtu.be/RaGpEIN-1OM?si=NViSP8fcpcPvw7ga" target="_blank" style="display: inline-block; padding: 10px 20px; background: rgba(255, 126, 103, 0.2); color: var(--light-orange); border-radius: 5px; text-decoration: none; border: 1px solid var(--accent-orange); transition: all 0.3s;">
+                        ▶ Listen to this song...
+                    </a>
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <button class="next-btn" id="nextBtn">
+        Next <i class="heart-icon">♥</i>
+    </button>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const nextBtn = document.getElementById('nextBtn');
+        const transitionLayer = document.getElementById('heart-transition');
+        let currentSlide = 0;
+
+        function createFloatingHearts(x, y) {
+            for (let i = 0; i < 5; i++) {
+                const heart = document.createElement('div');
+                heart.innerHTML = '♥';
+                heart.className = 'floating-heart';
+                heart.style.left = (x - 20 + Math.random() * 40) + 'px';
+                heart.style.top = (y - 20 + Math.random() * 40) + 'px';
+                heart.style.animationDelay = (Math.random() * 0.2) + 's';
+                document.body.appendChild(heart);
+                
+                setTimeout(() => {
+                    heart.remove();
+                }, 1000);
+            }
+        }
+
+        function triggerLoveTransition(callback) {
+            // Heart grows
+            transitionLayer.style.transition = 'transform 0.6s cubic-bezier(0.11, 0, 0.5, 0)';
+            transitionLayer.style.transform = 'translate(-50%, -50%) scale(1)';
+            
+            setTimeout(() => {
+                // Change the slide behind the heart
+                callback();
+                
+                // Heart fades away while scaling larger to reveal next slide
+                transitionLayer.style.transition = 'transform 0.8s ease-in, opacity 0.5s ease-in 0.3s';
+                transitionLayer.style.transform = 'translate(-50%, -50%) scale(10)';
+                transitionLayer.style.opacity = '0';
+                
+                setTimeout(() => {
+                    // Reset transition layer
+                    transitionLayer.style.transition = 'none';
+                    transitionLayer.style.transform = 'translate(-50%, -50%) scale(0)';
+                    transitionLayer.style.opacity = '1';
+                }, 800);
+            }, 600);
+        }
+
+        nextBtn.addEventListener('click', (e) => {
+            const rect = nextBtn.getBoundingClientRect();
+            createFloatingHearts(e.clientX || rect.left + rect.width/2, e.clientY || rect.top + rect.height/2);
+
+            if (currentSlide < slides.length - 1) {
+                // Start love animation, wait, then change slide
+                triggerLoveTransition(() => {
+                    slides[currentSlide].classList.remove('active');
+                    currentSlide++;
+                    slides[currentSlide].classList.add('active');
+                    
+                    if (currentSlide === slides.length - 1) {
+                        nextBtn.style.display = 'none'; // Hide next button on last slide
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
